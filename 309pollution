@@ -1,0 +1,65 @@
+#!/usr/bin/env python3
+
+import sys
+from math import factorial
+
+def bezier_area(x, y, grid, degree):
+    pollution = 0
+    for i in range(degree + 1):
+        for j in range(degree + 1):
+            b = int(factorial(degree) / (factorial(i) * factorial(degree - i)))
+            pk = pow(y, i) if i != 0 else 1
+            pnk = pow(1 - y, degree - i) if degree - i != 0 else 1
+            v = b * pk * pnk
+            b = int(factorial(degree) / (factorial(j) * factorial(degree - j)))
+            pk = pow(x, j) if j != 0 else 1
+            pnk = pow(1 - x, degree - j) if degree - j != 0 else 1
+            v *= b * pk * pnk
+            v *= grid[i][j]
+            pollution += v
+    return pollution
+
+def bezier_function(size, filepath, x, y):
+    if size <= 0:
+        sys.exit(84)
+    try:
+        x /= size - 1
+        y /= size - 1
+        if x < 0 or x > size - 2 or y < 0 or y > size - 2:
+            sys.exit(84)
+    except:
+        sys.exit(84)
+    grid = create_grid(filepath, size)
+    return x, y, grid, size - 1
+
+def create_grid(filepath, size):
+    try:
+        with open(filepath, "r") as file:
+            content = file.read()
+        lines = [line for line in content.split("\n") if line]
+        points_list = [list(map(int, point.split(";"))) for point in lines]
+    except:
+        sys.exit(84)
+    grid = [[0 for j in range(size)] for i in range(size)]
+    for point in points_list:
+        if point[0] < 0 or point[0] > size - 1 or point[1] < 0 or point[1] > size - 1:
+            sys.exit(84)
+        grid[point[1]][point[0]] = point[2]
+    return grid
+
+if __name__ == "__main__":
+    if len(sys.argv) == 5:
+        try:
+            x, y, grid, degree = bezier_function(int(sys.argv[1]), sys.argv[2], float(sys.argv[3]), float(sys.argv[4]))
+            pollution = bezier_area(x, y, grid, degree)
+            print("{:.2f}".format(pollution))
+        except:
+            sys.exit(84)
+        sys.exit(0)
+    elif len(sys.argv) == 2:
+        if (sys.argv[1] == "-h"):
+            print ("USAGE\n\t./309pollution n file x y\n\nDESCRIPTION\n\tn\tnumber of points on the grid axis\n\tfile\tcsv file containing the data points x;y;p\n\tx\tabscissa of the point whose pollution level we want to know\n\t y\torder of the point whose pollution level we want to know")
+            exit(0)
+        exit(84)
+    else:
+        exit(84)
